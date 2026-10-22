@@ -1,6 +1,6 @@
 pub mod terminal;
 
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 use ratatui::buffer::Buffer;
 use ratatui::layout::{Alignment, Constraint, Direction, Layout, Rect};
@@ -38,6 +38,13 @@ impl LayoutPreference {
     }
 }
 
+#[derive(Debug, Clone)]
+pub struct Toast {
+    pub message: String,
+    pub created_at: Instant,
+    pub duration: Duration,
+}
+
 pub struct UiState {
     pub layout_pref: LayoutPreference,
     pub immersive_override: Option<bool>,
@@ -45,6 +52,7 @@ pub struct UiState {
     pub fps: f32,
     frame_count: u32,
     last_fps_calc: Instant,
+    pub toast: Option<Toast>,
 }
 
 impl UiState {
@@ -56,7 +64,25 @@ impl UiState {
             fps: 60.0,
             frame_count: 0,
             last_fps_calc: Instant::now(),
+            toast: None,
         }
+    }
+
+    pub fn show_toast<S: Into<String>>(&mut self, message: S) {
+        self.toast = Some(Toast {
+            message: message.into(),
+            created_at: Instant::now(),
+            duration: Duration::from_millis(1800),
+        });
+    }
+
+    pub fn active_toast(&self) -> Option<&str> {
+        if let Some(t) = &self.toast {
+            if t.created_at.elapsed() < t.duration {
+                return Some(&t.message);
+            }
+        }
+        None
     }
 
     pub fn tick_fps(&mut self) {
@@ -157,6 +183,11 @@ pub fn render_frame(
         }
     }
 
+    // Render top floating toast notification if active
+    if let Some(msg) = ui_state.active_toast() {
+        render_top_toast(buf, area, msg, &palette);
+    }
+
     // Render help overlay if active
     if ui_state.show_help {
         render_help_overlay(
@@ -169,6 +200,61 @@ pub fn render_frame(
             ui_state,
             sensitivity,
         );
+    }
+}
+
+fn render_top_toast(buf: &mut Buffer, area: Rect, msg: &str, palette: &crate::theme::Palette) {
+    if area.width < 12 || area.height < 2 {
+        return;
+    }
+
+    let char_count = msg.chars().count();
+    let card_width = ((char_count + 6) as u16)
+        .clamp(20, area.width.saturating_sub(4).max(12));
+    let card_x = area.x + (area.width.saturating_sub(card_width)) / 2;
+
+    if area.height >= 7 {
+        let toast_area = Rect {
+            x: card_x,
+            y: area.y + 1,
+            width: card_width,
+            height: 3,
+        };
+        Clear.render(toast_area, buf);
+        let block = Block::default()
+            .borders(Borders::ALL)
+            .border_style(Style::default().fg(palette.accent))
+            .style(Style::default().bg(palette.background));
+        let text = Paragraph::new(Line::from(vec![
+            Span::styled(
+                msg,
+                Style::default()
+                    .fg(Color::White)
+                    .add_modifier(Modifier::BOLD),
+            ),
+        ]))
+        .alignment(Alignment::Center)
+        .block(block);
+        text.render(toast_area, buf);
+    } else {
+        let toast_area = Rect {
+            x: card_x,
+            y: area.y,
+            width: card_width,
+            height: 1,
+        };
+        Clear.render(toast_area, buf);
+        let pill = Paragraph::new(Line::from(vec![
+            Span::styled(
+                format!(" {} ", msg),
+                Style::default()
+                    .fg(palette.background)
+                    .bg(palette.accent)
+                    .add_modifier(Modifier::BOLD),
+            ),
+        ]))
+        .alignment(Alignment::Center);
+        pill.render(toast_area, buf);
     }
 }
 
@@ -297,19 +383,16 @@ fn render_help_overlay(
 
     let text = vec![
         Line::from(vec![
+            Span::styled(" Space / m  ", key_style),
+            Span::styled("Cycle next visualization mode", desc_style),
+        ]),
+        Line::from(vec![
             Span::styled(" 1–4        ", key_style),
-            Span::styled(
-                "Switch visualization mode (Classic, Mirror, Wave, Orbit)",
-                desc_style,
-            ),
+            Span::styled("Direct mode (Classic, Mirror, Wave, Orbit)", desc_style),
         ]),
         Line::from(vec![
             Span::styled(" Tab        ", key_style),
-            Span::styled("Cycle next theme", desc_style),
-        ]),
-        Line::from(vec![
-            Span::styled(" Shift+Tab  ", key_style),
-            Span::styled("Cycle previous theme", desc_style),
+            Span::styled("Cycle next theme (Shift+Tab for prev)", desc_style),
         ]),
         Line::from(vec![
             Span::styled(" f          ", key_style),
@@ -320,7 +403,7 @@ fn render_help_overlay(
             Span::styled("Adjust sensitivity", desc_style),
         ]),
         Line::from(vec![
-            Span::styled(" Space      ", key_style),
+            Span::styled(" s          ", key_style),
             Span::styled("Freeze / resume visualization", desc_style),
         ]),
         Line::from(vec![

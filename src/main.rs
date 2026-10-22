@@ -223,15 +223,41 @@ fn main() -> anyhow::Result<()> {
                     }
 
                     // Mode switching
+                    // Mode switching (Space, 1-4, m, n, p)
+                    KeyCode::Char(' ') | KeyCode::Char('m') | KeyCode::Char('n') => {
+                        current_mode = current_mode.next();
+                        ui_state.show_toast(format!(
+                            "{} Mode: {} ({}/4) • {}",
+                            current_mode.icon(),
+                            current_mode.name(),
+                            current_mode.number(),
+                            current_mode.collection()
+                        ));
+                    }
                     KeyCode::Char(c @ '1'..='4') => {
                         if let Some(digit) = c.to_digit(10)
                             && let Some(mode) = VisualMode::from_number(digit as u8)
                         {
                             current_mode = mode;
+                            ui_state.show_toast(format!(
+                                "{} Mode: {} ({}/4) • {}",
+                                current_mode.icon(),
+                                current_mode.name(),
+                                current_mode.number(),
+                                current_mode.collection()
+                            ));
                         }
                     }
-                    KeyCode::Char('m') | KeyCode::Char('n') => current_mode = current_mode.next(),
-                    KeyCode::Char('p') => current_mode = current_mode.prev(),
+                    KeyCode::Char('p') => {
+                        current_mode = current_mode.prev();
+                        ui_state.show_toast(format!(
+                            "{} Mode: {} ({}/4) • {}",
+                            current_mode.icon(),
+                            current_mode.name(),
+                            current_mode.number(),
+                            current_mode.collection()
+                        ));
+                    }
 
                     // Theme switching
                     KeyCode::Tab => {
@@ -240,9 +266,11 @@ fn main() -> anyhow::Result<()> {
                         } else {
                             theme_mgr.current_mode = theme_mgr.current_mode.next();
                         }
+                        ui_state.show_toast(format!("🎨 Theme: {}", theme_mgr.current_mode.name()));
                     }
                     KeyCode::BackTab => {
                         theme_mgr.current_mode = theme_mgr.current_mode.prev();
+                        ui_state.show_toast(format!("🎨 Theme: {}", theme_mgr.current_mode.name()));
                     }
 
                     // Layout toggle
@@ -250,19 +278,31 @@ fn main() -> anyhow::Result<()> {
                         let term_size = terminal.terminal_mut().size().unwrap_or_default();
                         let curr_imm = ui_state.is_immersive(term_size.width, term_size.height);
                         ui_state.toggle_immersive(curr_imm);
+                        ui_state.show_toast(if !curr_imm {
+                            "🖥️ Layout: Immersive"
+                        } else {
+                            "🪟 Layout: Compact"
+                        });
                     }
 
                     // Sensitivity
                     KeyCode::Char('+') | KeyCode::Char('=') => {
                         motion_engine.adjust_sensitivity(0.1);
+                        ui_state.show_toast(format!("🎚️ Sensitivity: {:.1}x", motion_engine.sensitivity));
                     }
                     KeyCode::Char('-') | KeyCode::Char('_') => {
                         motion_engine.adjust_sensitivity(-0.1);
+                        ui_state.show_toast(format!("🎚️ Sensitivity: {:.1}x", motion_engine.sensitivity));
                     }
 
-                    // Freeze
-                    KeyCode::Char(' ') => {
+                    // Pause / Freeze
+                    KeyCode::Char('s') => {
                         motion_engine.toggle_freeze();
+                        ui_state.show_toast(if motion_engine.frozen {
+                            "⏸️ Animation Paused"
+                        } else {
+                            "▶️ Animation Resumed"
+                        });
                     }
 
                     // Help

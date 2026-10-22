@@ -166,14 +166,14 @@ sudo install -m 755 target/release/chiviz /usr/local/bin/
 | `2` | 切换为 **Mirror Spectrum（镜像频谱）** |
 | `3` | 切换为 **Smooth Wave（平滑波形）** |
 | `4` | 切换为 **Orbit Radial（圆形环轨）** |
-| `m` / `n` | 切换下一模式 |
-| `p` | 切换上一模式 |
+| `Space` / `m` / `n` | 循环切换下一模式（并在顶部弹出悬浮提示 Toast） |
+| `p` | 循环切换上一模式 |
 | `Tab` | 切换下一主题配色 |
 | `Shift+Tab` | 切换上一主题配色 |
 | `f` | 切换沉浸模式（Immersive）/ 平铺模式（Compact） |
 | `+` / `=` | 提高灵敏度 |
 | `-` / `_` | 降低灵敏度 |
-| `Space` | 暂停 / 继续动画（不影响系统声音播放） |
+| `s` | 暂停 / 继续动画（Freeze） |
 | `?` / `h` | 打开 / 关闭快捷键帮助弹窗 |
 | `q` / `Esc` | 退出 Chiviz |
 

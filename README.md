@@ -164,14 +164,14 @@ sudo install -m 755 target/release/chiviz /usr/local/bin/
 | `2` | Switch to **Mirror Spectrum** |
 | `3` | Switch to **Smooth Wave** |
 | `4` | Switch to **Orbit Radial** |
-| `m` / `n` | Cycle next visualizer mode |
+| `Space` / `m` / `n` | Cycle next visualizer mode (with top toast notification) |
 | `p` | Cycle previous visualizer mode |
 | `Tab` | Cycle next theme preset |
 | `Shift+Tab` | Cycle previous theme preset |
 | `f` | Toggle Immersive mode / Compact mode |
 | `+` / `=` | Increase sensitivity |
 | `-` / `_` | Decrease sensitivity |
-| `Space` | Freeze / Resume animation |
+| `s` | Freeze / Resume animation |
 | `?` / `h` | Toggle keyboard help modal |
 | `q` / `Esc` | Quit Chiviz |
 

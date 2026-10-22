@@ -68,6 +68,24 @@ impl VisualMode {
             VisualMode::Orbit => "Orbit",
         }
     }
+    pub fn icon(&self) -> &'static str {
+        match self {
+            VisualMode::Classic => "📻",
+            VisualMode::Mirror => "🌊",
+            VisualMode::Wave => "〰️",
+            VisualMode::Orbit => "🪐",
+        }
+    }
+
+    pub fn number(&self) -> u8 {
+        match self {
+            VisualMode::Classic => 1,
+            VisualMode::Mirror => 2,
+            VisualMode::Wave => 3,
+            VisualMode::Orbit => 4,
+        }
+    }
+
 
     pub fn collection(&self) -> &'static str {
         match self {
