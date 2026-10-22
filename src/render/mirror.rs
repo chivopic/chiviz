@@ -1,6 +1,6 @@
 use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
-use ratatui::style::Style;
+use ratatui::style::{Color, Modifier, Style};
 
 use super::{BLOCK_CHARS, PEAK_CHAR, VisualizerRenderer, VisualizerState, set_cell};
 
@@ -38,9 +38,12 @@ impl VisualizerRenderer for MirrorRenderer {
         let half_height = center_y;
         let max_subunits = half_height * 8;
 
-        let (bar_width, gap) = if width >= state.values.len() * 3 {
+        let val_count = state.values.len();
+        let (bar_width, gap) = if width >= val_count * 4 {
+            (3, 1)
+        } else if width >= val_count * 3 {
             (2, 1)
-        } else if width >= state.values.len() * 2 {
+        } else if width >= (val_count * 3) / 2 {
             (1, 1)
         } else {
             (1, 0)
@@ -48,7 +51,7 @@ impl VisualizerRenderer for MirrorRenderer {
 
         let unit_stride = bar_width + gap;
         let max_bars = width / unit_stride.max(1);
-        let num_bars = state.values.len().min(max_bars);
+        let num_bars = val_count.min(max_bars);
 
         let used_width = num_bars * unit_stride;
         let x_offset = if width > used_width {
@@ -57,22 +60,28 @@ impl VisualizerRenderer for MirrorRenderer {
             0
         };
 
-        // Draw center baseline
+        let time = state.elapsed_sec;
+        let bass = state.bass_energy;
+
+        // Draw animated liquid centerline with audio-reactive glow
+        let center_color = if bass > 0.45 {
+            state.palette.accent
+        } else {
+            state.palette.muted
+        };
+        let center_char = if bass > 0.6 { '═' } else { '─' };
+
         for bx in 0..width {
             set_cell(
                 buf,
                 area,
                 area.x as usize + bx,
                 area.y as usize + center_y,
-                '─',
-                Style::default().fg(state.palette.muted),
+                center_char,
+                Style::default().fg(center_color),
             );
         }
 
-        // Lower half block characters for downward reflection:
-        // '▔', '▀', etc.
-        // Or standard blocks: for upper half, grows from center_y up.
-        // For lower half, grows from center_y down.
         for bar_idx in 0..num_bars {
             let val = state.values[bar_idx].clamp(0.0, 1.0);
             let peak = state
@@ -89,7 +98,7 @@ impl VisualizerRenderer for MirrorRenderer {
 
             // 1. Upper half: from center_y - 1 going UP to 0
             for dy in 0..half_height {
-                let row_from_center = dy; // 0 is immediately above center line
+                let row_from_center = dy;
                 let target_y = center_y - 1 - dy;
 
                 let cell_subunit_start = row_from_center * 8;
@@ -97,23 +106,32 @@ impl VisualizerRenderer for MirrorRenderer {
 
                 let height_ratio = row_from_center as f32 / half_height.max(1) as f32;
                 let cell_color = state.palette.interpolate_gradient(height_ratio);
-                let cell_style = Style::default().fg(cell_color);
+                let mut cell_style = Style::default().fg(cell_color);
 
-                let ch = if bar_subunits >= cell_subunit_end {
-                    '█'
+                let (ch, is_tip) = if bar_subunits >= cell_subunit_end {
+                    ('█', false)
                 } else if bar_subunits > cell_subunit_start {
                     let rem = bar_subunits - cell_subunit_start;
-                    BLOCK_CHARS[rem.min(8)]
+                    (BLOCK_CHARS[rem.min(8)], true)
                 } else {
-                    ' '
+                    (' ', false)
                 };
+
+                if is_tip {
+                    cell_style = cell_style.add_modifier(Modifier::BOLD);
+                }
 
                 let (final_ch, final_style) = if ch == ' '
                     && peak_subunits >= cell_subunit_start
                     && peak_subunits < cell_subunit_end
                     && peak > 0.02
                 {
-                    (PEAK_CHAR, Style::default().fg(state.palette.accent))
+                    let peak_color = if peak > 0.85 {
+                        Color::White
+                    } else {
+                        state.palette.accent
+                    };
+                    (PEAK_CHAR, Style::default().fg(peak_color).add_modifier(Modifier::BOLD))
                 } else {
                     (ch, cell_style)
                 };
@@ -132,10 +150,9 @@ impl VisualizerRenderer for MirrorRenderer {
                 }
             }
 
-            // 2. Lower half: reflection from center_y + 1 going DOWN to height - 1
-            // Reflected bars are slightly attenuated (e.g. 75% height) with darker/muted color
-            let refl_subunits = (bar_subunits as f32 * 0.75).round() as usize;
+            // 2. Lower half: realistic water ripple reflection with depth attenuation
             let remaining_lower = height.saturating_sub(center_y + 1);
+            let refl_subunits = (bar_subunits as f32 * 0.80).round() as usize;
 
             for dy in 0..remaining_lower {
                 let row_from_center = dy;
@@ -144,18 +161,34 @@ impl VisualizerRenderer for MirrorRenderer {
                 let cell_subunit_start = row_from_center * 8;
                 let cell_subunit_end = cell_subunit_start + 8;
 
-                // Reflection style: dimmer color
-                let height_ratio = row_from_center as f32 / half_height.max(1) as f32;
-                let orig_color = state.palette.interpolate_gradient(height_ratio);
-                let dimmed_color = dim_color(orig_color, 0.45);
+                // Depth fading: deeper reflection becomes progressively darker and more diffused
+                let depth_ratio = row_from_center as f32 / remaining_lower.max(1) as f32;
+                let orig_color = state.palette.interpolate_gradient(depth_ratio * 0.7);
+                let dim_factor = (0.55 - depth_ratio * 0.35).max(0.12);
+                let dimmed_color = dim_color(orig_color, dim_factor);
                 let cell_style = Style::default().fg(dimmed_color);
 
-                // For downward direction, upper blocks:
-                // We can use standard blocks or '▀' inverted
-                let ch = if refl_subunits >= cell_subunit_end {
-                    '█'
-                } else if refl_subunits > cell_subunit_start {
-                    '▄'
+                // Animated ripple shimmer on water surface
+                let ripple_phase = (bar_idx as f32 * 0.5 + time * 3.5 + dy as f32 * 0.8).sin();
+                let shimmer = ripple_phase * bass * 3.0;
+                let effective_subunits = (refl_subunits as f32 + shimmer).max(0.0) as usize;
+
+                let ch = if effective_subunits >= cell_subunit_end {
+                    if depth_ratio > 0.5 {
+                        '▓'
+                    } else {
+                        '█'
+                    }
+                } else if effective_subunits > cell_subunit_start {
+                    if depth_ratio > 0.6 {
+                        '░'
+                    } else if depth_ratio > 0.3 {
+                        '▒'
+                    } else {
+                        '▄'
+                    }
+                } else if depth_ratio < 0.3 && ripple_phase > 0.7 && bass > 0.35 {
+                    '~'
                 } else {
                     ' '
                 };
@@ -177,13 +210,13 @@ impl VisualizerRenderer for MirrorRenderer {
     }
 }
 
-fn dim_color(color: ratatui::style::Color, factor: f32) -> ratatui::style::Color {
+fn dim_color(color: Color, factor: f32) -> Color {
     match color {
-        ratatui::style::Color::Rgb(r, g, b) => {
+        Color::Rgb(r, g, b) => {
             let r = (r as f32 * factor).round() as u8;
             let g = (g as f32 * factor).round() as u8;
             let b = (b as f32 * factor).round() as u8;
-            ratatui::style::Color::Rgb(r, g, b)
+            Color::Rgb(r, g, b)
         }
         other => other,
     }

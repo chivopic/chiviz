@@ -47,26 +47,25 @@ impl VisualizerRenderer for OrbitRenderer {
         let mut braille_grid = vec![0u8; width * height];
 
         // Terminal font aspect ratio correction for Braille:
-        // Typical Kitty font: width/height ~ 0.5.
-        // Braille has 2 cols, 4 rows. So each sub-pixel is (1/2):(1/4)*2 = 1:1.
-        // We add a fine-tuning factor of 1.05 to maintain perfect circularity.
+        // Maintains circular geometry across typical fonts
         let aspect_ratio = 1.05f32;
 
         let max_dim = (sub_width as f32).min(sub_height as f32 * aspect_ratio);
-        let base_radius = max_dim * 0.18;
-        let max_spike_len = max_dim * 0.28;
+        let base_radius = max_dim * 0.17;
+        let max_spike_len = max_dim * 0.29;
 
-        // Bass energy breathes/expands the inner radius
         let bass = state.bass_energy;
         let treble = state.treble_energy;
+        let energy = state.normalized_energy;
         let time = state.elapsed_sec;
 
-        let inner_radius = base_radius * (1.0 + bass * 0.5);
+        // Breathing inner core radius driven by low frequencies
+        let inner_radius = base_radius * (1.0 + bass * 0.45);
 
         let num_bands = state.values.len();
         let num_rays = num_bands.clamp(32, 128);
 
-        // 1. Draw inner pulsating circle
+        // 1. Draw inner pulsating reactor core
         let circle_steps = 180;
         for step in 0..circle_steps {
             let theta = (step as f32 / circle_steps as f32) * 2.0 * PI;
@@ -79,16 +78,27 @@ impl VisualizerRenderer for OrbitRenderer {
             if sx >= 0 && sx < sub_width as isize && sy >= 0 && sy < sub_height as isize {
                 set_braille_dot(&mut braille_grid, width, sx as usize, sy as usize);
             }
+
+            // Concentric secondary sub-ring on heavy bass drop
+            if bass > 0.40 && step % 2 == 0 {
+                let sub_r = inner_radius * 0.60;
+                let srx = sub_r * theta.cos();
+                let sry = (sub_r * theta.sin()) / aspect_ratio;
+                let ssx = (center_x + srx).round() as isize;
+                let ssy = (center_y + sry).round() as isize;
+                if ssx >= 0 && ssx < sub_width as isize && ssy >= 0 && ssy < sub_height as isize {
+                    set_braille_dot(&mut braille_grid, width, ssx as usize, ssy as usize);
+                }
+            }
         }
 
-        // 2. Trace outer spectrum perimeter & radial spikes
+        // 2. Trace outer spectrum perimeter & radial spokes
         let angular_steps = 360;
         let mut prev_outer_x = None;
         let mut prev_outer_y = None;
 
         for step in 0..=angular_steps {
             let theta = (step as f32 / angular_steps as f32) * 2.0 * PI;
-            // Map angle to spectrum bin (0 at top, clockwise)
             let norm_angle = (theta / (2.0 * PI)).clamp(0.0, 1.0);
 
             // Symmetrical wrap: 0 to 0.5 is left-to-right, 0.5 to 1.0 is mirrored
@@ -102,9 +112,8 @@ impl VisualizerRenderer for OrbitRenderer {
                 .min(num_bands.saturating_sub(1));
             let val = state.values.get(band_idx).copied().unwrap_or(0.0);
 
-            // Treble shimmer
-            let shimmer = (theta * 24.0 + time * 6.0).sin() * treble * 2.5;
-
+            // High-frequency treble shimmer ripples
+            let shimmer = (theta * 24.0 + time * 6.5).sin() * treble * 2.8;
             let current_radius = inner_radius + val * max_spike_len + shimmer;
 
             let rx = current_radius * theta.cos();
@@ -130,7 +139,7 @@ impl VisualizerRenderer for OrbitRenderer {
             prev_outer_y = Some(outer_y);
 
             // Periodically draw radial spokes from inner radius to outer spike
-            if step % (angular_steps / num_rays).max(1) == 0 && val > 0.08 {
+            if step % (angular_steps / num_rays).max(1) == 0 && val > 0.05 {
                 let inner_rx = inner_radius * theta.cos();
                 let inner_ry = (inner_radius * theta.sin()) / aspect_ratio;
                 let in_x = (center_x + inner_rx).round() as isize;
@@ -148,7 +157,29 @@ impl VisualizerRenderer for OrbitRenderer {
             }
         }
 
-        // Render Braille grid to buffer with radial color gradient
+        // 3. Rotating Satellite Orbital Particles (4 satellite points orbiting the outer edge)
+        let num_satellites = 4;
+        let orbit_speed = 1.2 + energy * 2.0;
+        for i in 0..num_satellites {
+            let sat_angle = time * orbit_speed + (i as f32 * 2.0 * PI / num_satellites as f32);
+            let sat_r = (inner_radius + max_spike_len * 1.08 + (sat_angle * 3.0).sin() * 2.0)
+                .min(max_dim * 0.48);
+            let sat_x = (center_x + sat_r * sat_angle.cos()).round() as isize;
+            let sat_y = (center_y + (sat_r * sat_angle.sin()) / aspect_ratio).round() as isize;
+
+            if sat_x >= 1
+                && sat_x + 1 < sub_width as isize
+                && sat_y >= 1
+                && sat_y + 1 < sub_height as isize
+            {
+                // Draw cross satellite cluster
+                set_braille_dot(&mut braille_grid, width, sat_x as usize, sat_y as usize);
+                set_braille_dot(&mut braille_grid, width, (sat_x + 1) as usize, sat_y as usize);
+                set_braille_dot(&mut braille_grid, width, sat_x as usize, (sat_y + 1) as usize);
+            }
+        }
+
+        // 4. Render Braille grid to buffer with radial color gradient
         for cy in 0..height {
             let cell_y = area.y as usize + cy;
             if cell_y >= area.bottom() as usize {
@@ -170,7 +201,7 @@ impl VisualizerRenderer for OrbitRenderer {
                     let dy = (sub_y - center_y) * aspect_ratio;
                     let dist = (dx * dx + dy * dy).sqrt();
 
-                    let grad_ratio = ((dist - inner_radius * 0.7) / (max_spike_len * 1.2).max(1.0))
+                    let grad_ratio = ((dist - inner_radius * 0.6) / (max_spike_len * 1.25).max(1.0))
                         .clamp(0.0, 1.0);
                     let color = state.palette.interpolate_gradient(grad_ratio);
                     let style = Style::default().fg(color);
