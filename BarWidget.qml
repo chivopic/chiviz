@@ -23,16 +23,15 @@ BarWidget {
     text: "󰎈"
     fontSize: Style.font.body
     active: root.hasAudio
-    tooltipText: "⚡ Chiviz Audio Visualizer\n• Left-click: Launch / Focus Chiviz\n• Right-click: Diagnostics (--doctor)\n• Middle-click: Floating Window"
+    tooltipText: "⚡ Chiviz 音频可视化\n• 左键：唤醒 / 聚焦可视化窗口\n• 右键：运行系统自检诊断 (--doctor)\n• 中键：浮动独立小窗模式"
 
     onPressed: function(btn) {
-      if (!root.bar) return
       if (btn === Qt.RightButton) {
-        root.bar.run("omarchy-launch-tui --app-id=chiviz-doctor chiviz --doctor")
+        Quickshell.execDetached(["kitty", "--class", "chiviz-doctor", "--hold", "-e", "chiviz", "--doctor"])
       } else if (btn === Qt.MiddleButton) {
-        root.bar.run("omarchy-launch-tui --app-id=chiviz-float chiviz")
+        Quickshell.execDetached(["kitty", "--class", "chiviz-float", "-e", "chiviz"])
       } else {
-        root.bar.run("omarchy-launch-or-focus-tui --app-id=chiviz chiviz")
+        Quickshell.execDetached(["omarchy-launch-or-focus", "chiviz-visualizer", "kitty --class chiviz-visualizer -e chiviz"])
       }
     }
   }

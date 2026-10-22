@@ -12,10 +12,10 @@ pub struct MotionConfig {
 impl Default for MotionConfig {
     fn default() -> Self {
         Self {
-            attack_rate: 38.0,
-            release_rate: 7.5,
-            peak_hold_sec: 0.35,
-            peak_gravity: 3.5,
+            attack_rate: 42.0,
+            release_rate: 9.0,
+            peak_hold_sec: 0.28,
+            peak_gravity: 4.2,
             frequency_smoothing: true,
         }
     }
@@ -108,14 +108,14 @@ impl MotionEngine {
         let frame_peak = smoothed_input.iter().cloned().fold(0.0f32, f32::max);
         if frame_peak > self.rolling_peak_energy {
             // Fast attack on rolling peak
-            self.rolling_peak_energy += (frame_peak - self.rolling_peak_energy) * 0.2;
+            self.rolling_peak_energy += (frame_peak - self.rolling_peak_energy) * 0.25;
         } else {
-            // Slow decay on rolling peak towards floor of 0.4
-            self.rolling_peak_energy = (self.rolling_peak_energy - 0.05 * dt).max(0.4);
+            // Smooth decay on rolling peak towards responsive floor of 0.12
+            self.rolling_peak_energy = (self.rolling_peak_energy - 0.08 * dt).max(0.12);
         }
 
-        let norm_scale = if self.rolling_peak_energy > 0.05 {
-            (1.0 / self.rolling_peak_energy).min(2.5)
+        let norm_scale = if self.rolling_peak_energy > 0.01 {
+            (1.0 / self.rolling_peak_energy).min(8.0)
         } else {
             1.0
         };
@@ -125,7 +125,9 @@ impl MotionEngine {
 
         // Update each bar
         for (i, &band_input) in smoothed_input.iter().enumerate().take(self.bars_count) {
-            let target = (band_input * self.sensitivity * norm_scale).clamp(0.0, 1.0);
+            let raw_scaled = (band_input * self.sensitivity * norm_scale).clamp(0.0, 4.0);
+            // Perceptual logarithmic-like expansion (0.72) brings out subtle audio details
+            let target = raw_scaled.powf(0.72).clamp(0.0, 1.0);
             let current = self.values[i];
 
             let new_val = if target >= current {

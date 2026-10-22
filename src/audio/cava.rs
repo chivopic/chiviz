@@ -52,12 +52,16 @@ impl CavaSource {
     }
 
     /// Generate ini configuration for CAVA
+    /// Generate ini configuration for CAVA with responsive sensitivity and smoothing
     pub fn generate_config_content(framerate: u32, bars: usize, source: &str) -> String {
         format!(
             r#"[general]
 framerate = {}
 bars = {}
 autosens = 1
+sensitivity = 200
+lower_cutoff_freq = 50
+higher_cutoff_freq = 12000
 
 [input]
 method = pipewire
@@ -69,6 +73,10 @@ raw_target = /dev/stdout
 data_format = ascii
 ascii_max_range = 1000
 channels = mono
+mono_option = average
+
+[smoothing]
+noise_reduction = 45
 "#,
             framerate, bars, source
         )

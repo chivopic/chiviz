@@ -182,13 +182,28 @@ impl ThemeManager {
             let cyan = parse_hex_color(parsed.cyan.as_deref().unwrap_or("#8be9fd"));
             let blue = parse_hex_color(parsed.blue.as_deref().unwrap_or("#bd93f9"));
             let magenta = parse_hex_color(parsed.magenta.as_deref().unwrap_or("#ff79c6"));
-
-            let gradient = vec![blue, cyan, green, yellow, accent, red];
+            let is_monochrome = is_rgb_grey(red) && is_rgb_grey(green) && is_rgb_grey(blue);
+            let gradient = if is_monochrome {
+                vec![
+                    Color::Rgb(70, 70, 75),
+                    Color::Rgb(110, 110, 120),
+                    Color::Rgb(165, 165, 180),
+                    Color::Rgb(215, 215, 230),
+                    Color::Rgb(255, 255, 255),
+                ]
+            } else {
+                vec![blue, cyan, green, yellow, accent, red]
+            };
+            let active_accent = if is_monochrome {
+                Color::Rgb(255, 255, 255)
+            } else {
+                accent
+            };
 
             self.omarchy_palette = Some(Palette {
                 background: bg,
                 foreground: fg,
-                accent,
+                accent: active_accent,
                 muted,
                 red,
                 yellow,
@@ -342,6 +357,13 @@ impl ThemeManager {
                 Color::Rgb(255, 0, 0),   // Red
             ],
         }
+    }
+}
+
+pub fn is_rgb_grey(c: Color) -> bool {
+    match c {
+        Color::Rgb(r, g, b) => (r as i32 - g as i32).abs() < 12 && (g as i32 - b as i32).abs() < 12,
+        _ => false,
     }
 }
 
