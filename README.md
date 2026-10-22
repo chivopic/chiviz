@@ -2,16 +2,15 @@
 
 ![chiviz banner](assets/chiviz-banner.svg)
 
-# ⚡ chiviz
+# chiviz
 
-**Omarchy-Native Audio Visualizer & Quickshell Bar Widget**  
-*Crafted for Omarchy, Kitty Terminal, Hyprland, and PipeWire.*
+**Audio Spectrum Visualizer & Omarchy Status Bar Plugin**  
+*Optimized for Omarchy, Kitty Terminal, Hyprland, and PipeWire.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Rust Edition](https://img.shields.io/badge/Rust-2024_Edition-orange.svg)](Cargo.toml)
 [![Omarchy Plugin](https://img.shields.io/badge/Omarchy_Plugin-v1_Compliant-10b981.svg)](manifest.json)
 [![Platform](https://img.shields.io/badge/Platform-Omarchy_%7C_Arch_Linux-blueviolet.svg)](https://omarchy.org)
-[![Audio Backend](https://img.shields.io/badge/Audio-PipeWire_Monitor-06b6d4.svg)](https://pipewire.org)
 
 [English](README.md) · [简体中文](README_zh.md)
 
@@ -19,32 +18,18 @@
 
 ---
 
-`chiviz` is a high-performance, real-time terminal audio spectrum visualizer and Omarchy shell plugin. Rather than a standalone media player, it is an **audio-reactive engine** that passively intercepts system PipeWire audio (YouTube, Spotify, games, or browser streams) and renders fluid, ultra-smooth visualizations synchronized with your active Omarchy theme in Kitty and Hyprland.
+`chiviz` is a high-performance terminal audio spectrum visualizer and Omarchy shell plugin. It passively captures system PipeWire output (Spotify, browser, games) and renders real-time audio-reactive animations in Kitty and Hyprland, automatically synchronized with the active Omarchy system theme.
 
----
+## Visual Modes
 
-## 🌟 Highlights & Key Features
+| Mode | Key | Collection | Description |
+|:---|:---:|:---|:---|
+| **Classic Bars** | `1` | Retro | High-density spectrum bars with floating peak caps and 1/8th Unicode sub-blocks |
+| **Mirror Spectrum** | `2` | Retro | Symmetrical top-bottom reflection with animated water-surface ripples and depth fading |
+| **Smooth Wave** | `3` | Modern | Continuous multi-harmonic waveform with dual-layer echo and 2×4 Braille sub-pixel matrices |
+| **Orbit** | `4` | Modern | Circular radial spectrum with pulsating reactor core and orbiting satellite particles |
 
-- 🎧 **Passive PipeWire Capture**: Intercepts output sink monitors without occupying microphones, interrupting active streams, or demanding microphone permissions.
-- 🔄 **Dynamic Device Failover**: Seamlessly handles headphone disconnects/reconnects (AirPods Pro ⇄ Internal Speakers ⇄ HDMI) with instant auto-recovery.
-- ⚙️ **Precision Motion Engine**:
-  - Instant attack curves with natural exponential decay.
-  - Floating peak hold indicators with simulated gravity falloff.
-  - Dynamic rolling normalization to prevent clipping and low-volume idling.
-  - Ring buffer queue-dropping to completely eliminate latency accumulation.
-- 🎨 **Omarchy Theme Synchronization**: Automatically monitors `~/.local/state/omarchy/current/theme/colors.toml` and hot-reloads palettes live without restarting.
-- 🧩 **Omarchy Shell Bar Widget**: Ships with an official Quickshell bar widget (`chiv.chiviz`) for one-click launching, floating window summon, and audio-reactive status.
-- 🩺 **Built-in System Doctor (`--doctor`)**: Diagnoses Kitty capabilities, PipeWire nodes, default sinks, CAVA streams, and Omarchy theme paths in one command.
-
----
-
-## 🖼️ Visual Showcase & Modes
-
-`chiviz` features two design collections across 4 mathematical visualization modes:
-
-### 1. 📻 Classic Bars (`--mode classic`)
-*High-density spectrum bars with floating peak caps and 1/8th Unicode sub-block precision.*
-
+### 1. Classic Bars
 ```text
   80 dB ┤                                        ▔
         │                        ▔       █             ▔
@@ -55,9 +40,7 @@
         50Hz        250Hz        1kHz         4kHz        16kHz
 ```
 
-### 2. 🌊 Mirror Spectrum (`--mode mirror`)
-*Symmetrical top-bottom frequency reflection with attenuated water-mirror ripple decay.*
-
+### 2. Mirror Spectrum
 ```text
         │        █       █       █       █       █
         │    █   █ █ █   █ █ █ █ █ █ █ █ █ █ █ █ █ █ █
@@ -66,9 +49,7 @@
         │        ░       ▒       ▒       ░       ░
 ```
 
-### 3. 〰️ Smooth Wave (`--mode wave`)
-*Continuous multi-harmonic waveform rendered with 2×4 Unicode Braille sub-pixel matrices.*
-
+### 3. Smooth Wave
 ```text
         ⡀                                   ⢄
        ⢠⠃⠣⡀                                ⠳⡄
@@ -76,9 +57,7 @@
   ───⠤⠊───────⠘⠢⠤⠤⠞─────⠈⠢⠤⠤⠖⠊⠑⠢⠤⠤⠴⠒⠊⠉⠙⠢⠤⠴⠒⠊⠉⠙⠒─────
 ```
 
-### 4. 🪐 Orbit Radial (`--mode orbit`)
-*Circular radial spectrum with 2:1 terminal aspect ratio correction; bass pulses the core radius while treble ripples the perimeter.*
-
+### 4. Orbit
 ```text
                           ⠘⡆ ⡞⠃
                      ⢀⠤⠒⠈⠉⠁⠒⠤⡀
@@ -90,140 +69,70 @@
                            ⠱⡄ ⢠⠎
 ```
 
----
-
-## 📐 Pipeline & Architecture
+## Architecture & Data Flow
 
 ![Chiviz Architecture](assets/chiviz-architecture.svg)
 
-```mermaid
-flowchart LR
-    A[PipeWire Audio] -->|Sink Monitor Stream| B[CAVA Raw ASCII Engine]
-    B -->|Bounded Channel| C[Motion Engine]
-    C -->|Dynamic Curves & Peaks| D[Visualizer Renderers]
-    D --> E[Classic / Mirror / Wave / Orbit]
-    F[Omarchy Theme Watcher] -->|colors.toml Hot Reload| D
-    D --> G[Kitty Terminal]
-    H[Omarchy Shell Bar] -->|Quickshell Plugin| G
-```
+- **PipeWire Capture**: Intercepts output sink monitors passively without recording microphones or requesting extra permissions.
+- **Dynamic Failover**: Automatically tracks audio sink changes (Headphones ⇄ Internal Speakers) with instant recovery.
+- **Motion Engine**: Instant attack, exponential release, floating peak hold, and non-linear perceptual loudness scaling ($x^{0.72}$).
+- **Omarchy Theme Sync**: Live-monitors `~/.local/state/omarchy/current/theme/colors.toml` and hot-reloads palettes.
+- **Diagnostics**: Built-in `chiviz --doctor` verifies Kitty terminal, PipeWire, CAVA streams, and theme paths.
 
----
+## Installation
 
-## ⚡ Omarchy Plugin Marketplace
-
-`chiviz` conforms to the **Omarchy Shell Plugin v1** manifest specification (`manifest.json`) and is ready for the [Omarchy Plugin Marketplace](https://plugins.omarchy.org).
-
-### Install via Omarchy CLI
-
+### Via Omarchy Plugin Marketplace
 ```bash
-# 1. Add and enable the plugin directly into Omarchy shell
 omarchy plugin add https://github.com/chivopic/chiviz.git --enable
-
-# 2. Build and install the binary (if not already on PATH)
-cd ~/.config/omarchy/plugins/chiv.chiviz
-cargo build --release
-sudo cp target/release/chiviz /usr/local/bin/
 ```
 
-### Bar Widget Controls
-
-The integrated bar widget (`󰎈`) provides quick interaction:
-- **Left Click**: Launch or focus the running Chiviz window (`omarchy-launch-or-focus-tui`).
-- **Right Click**: Launch system diagnostic doctor (`chiviz --doctor`).
-- **Middle Click**: Launch Chiviz in a floating window.
-
----
-
-## 🚀 Manual Installation & Build
-
-### System Dependencies
-
+### From Source
 ```bash
-# Arch Linux / Omarchy
+# Prerequisites (Arch Linux / Omarchy)
 sudo pacman -S cava pipewire wireplumber kitty
-```
 
-### Build from Source
-
-```bash
+# Build & install binary
 git clone https://github.com/chivopic/chiviz.git
 cd chiviz
 cargo build --release
-
-# Install executable to system path
-sudo install -m 755 target/release/chiviz /usr/local/bin/
+install -m 755 target/release/chiviz ~/.local/bin/chiviz
 ```
 
----
-
-## 🎮 Keybindings
+## Keybindings
 
 | Key | Action |
 |:---|:---|
-| `1` | Switch to **Classic Bars** |
-| `2` | Switch to **Mirror Spectrum** |
-| `3` | Switch to **Smooth Wave** |
-| `4` | Switch to **Orbit Radial** |
-| `Space` / `m` / `n` | Cycle next visualizer mode (with top toast notification) |
-| `p` | Cycle previous visualizer mode |
-| `Tab` | Cycle next theme preset |
-| `Shift+Tab` | Cycle previous theme preset |
-| `f` | Toggle Immersive mode / Compact mode |
-| `+` / `=` | Increase sensitivity |
-| `-` / `_` | Decrease sensitivity |
-| `s` | Freeze / Resume animation |
+| `Space` / `m` / `n` | Cycle visual mode (displays top toast notification) |
+| `1` – `4` | Direct switch to Classic, Mirror, Wave, or Orbit |
+| `p` | Cycle previous visual mode |
+| `Tab` / `Shift+Tab` | Cycle next / previous color theme |
+| `f` | Toggle between Immersive and Compact layouts |
+| `+` / `-` | Adjust sensitivity multiplier |
+| `s` | Freeze / resume animation |
 | `?` / `h` | Toggle keyboard help modal |
-| `q` / `Esc` | Quit Chiviz |
+| `q` / `Ctrl+C` | Quit |
 
----
-
-## 🛠️ CLI Options
+## CLI Options
 
 ```bash
-# Default launch (auto-follows active Omarchy theme and default PipeWire sink)
-chiviz
-
-# Run built-in diagnostics & health check
-chiviz --doctor
-
-# Test visualizers with synthetic demo audio (no PipeWire/CAVA required)
-chiviz --demo
-
-# List available PipeWire audio sinks
-chiviz --list-devices
-
-# Launch specific mode directly
-chiviz --mode wave
-chiviz --mode orbit
-chiviz --mode mirror
-chiviz --mode classic
-
-# Custom frame rate, bars, and sensitivity
-chiviz --framerate 60 --bars 64 --sensitivity 1.25
-
-# Select theme override
-chiviz --theme tokyonight
-chiviz --theme catppuccin
-chiviz --theme neon
-chiviz --theme winamp
+chiviz                         # Default launch (auto-detects PipeWire sink & Omarchy theme)
+chiviz --mode wave             # Launch specific mode (classic, mirror, wave, orbit)
+chiviz --theme tokyonight      # Launch with theme override
+chiviz --demo                  # Test visualization with synthetic audio
+chiviz --doctor                # Run environment diagnostics
+chiviz --list-devices          # List all available PipeWire audio sinks
 ```
 
----
+## Hyprland Integration
 
-## 🪟 Hyprland Integration
-
-Add the following rule to `~/.config/hypr/rules.conf` or `~/.config/hypr/looknfeel.lua` to make floating visualizers seamlessly snap to center:
+Add to `~/.config/hypr/rules.conf`:
 
 ```ini
-# Floating window rule for Chiviz
-windowrulev2 = float, class:^(org.omarchy.chiviz-float|chiviz-float)$
-windowrulev2 = size 900 480, class:^(org.omarchy.chiviz-float|chiviz-float)$
-windowrulev2 = center, class:^(org.omarchy.chiviz-float|chiviz-float)$
+windowrulev2 = float, class:^(chiviz-visualizer|chiviz-float)$
+windowrulev2 = size 920 480, class:^(chiviz-visualizer|chiviz-float)$
+windowrulev2 = center, class:^(chiviz-visualizer|chiviz-float)$
 ```
 
----
+## License
 
-## 📄 License
-
-Distributed under the **MIT License**. See [LICENSE](LICENSE) for details.  
-Crafted with pride for **Omarchy** and the Linux audio enthusiast community.
+MIT License. See [LICENSE](LICENSE) for details.

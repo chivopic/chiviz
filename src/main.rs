@@ -205,6 +205,11 @@ fn main() -> anyhow::Result<()> {
         // Poll keyboard events (non-blocking with tiny timeout)
         while event::poll(Duration::from_millis(0))? {
             if let Event::Key(key) = event::read()? {
+                // Direct Ctrl+C exit
+                if key.modifiers.contains(KeyModifiers::CONTROL) && key.code == KeyCode::Char('c') {
+                    return Ok(());
+                }
+
                 match key.code {
                     // Quit
                     KeyCode::Char('q') => {

@@ -411,8 +411,8 @@ fn render_help_overlay(
             Span::styled("Toggle this help dialog", desc_style),
         ]),
         Line::from(vec![
-            Span::styled(" q / Esc    ", key_style),
-            Span::styled("Quit", desc_style),
+            Span::styled(" q / Ctrl+C ", key_style),
+            Span::styled("Quit (or Esc to dismiss dialog)", desc_style),
         ]),
         Line::from(""),
         Line::from(vec![
