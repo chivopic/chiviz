@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 320" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b0f17"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#0f172a" stop-opacity="0.8"/>
+    </linearGradient>
+    <linearGradient id="accentCyan" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#06b6d4"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+    <linearGradient id="accentPurple" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#ec4899"/>
+    </linearGradient>
+    <linearGradient id="accentGreen" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#38bdf8"/>
+    </marker>
+  </defs>
+
+  <!-- Canvas Background -->
+  <rect width="920" height="320" rx="16" fill="url(#bgGrad)" stroke="#1e293b" stroke-width="1.5"/>
+
+  <!-- Title & Header -->
+  <text x="40" y="38" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="700" fill="#f8fafc" letter-spacing="0.5">⚡ CHIVIZ PIPELINE &amp; ARCHITECTURE</text>
+  <text x="40" y="58" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#94a3b8">Real-time asynchronous audio flow from PipeWire sink monitor to Kitty terminal and Omarchy shell bar</text>
+
+  <!-- Step 1: PipeWire Audio Server -->
+  <g transform="translate(40, 85)">
+    <rect width="145" height="185" rx="10" fill="url(#cardGrad)" stroke="#334155" stroke-width="1"/>
+    <rect x="0" y="0" width="145" height="4" rx="2" fill="url(#accentCyan)"/>
+    <text x="16" y="32" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#38bdf8">1. PipeWire</text>
+    <text x="16" y="52" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">AUDIO SOURCE</text>
+    
+    <rect x="14" y="68" width="117" height="30" rx="6" fill="#1e293b" stroke="#334155"/>
+    <text x="24" y="87" font-family="system-ui, sans-serif" font-size="10" fill="#cbd5e1">Default Sink</text>
+    
+    <rect x="14" y="106" width="117" height="30" rx="6" fill="#1e293b" stroke="#334155"/>
+    <text x="24" y="125" font-family="system-ui, sans-serif" font-size="10" fill="#cbd5e1">Monitor Stream</text>
+    
+    <text x="16" y="160" font-family="system-ui, sans-serif" font-size="9" fill="#94a3b8">Zero mic hijacking</text>
+    <text x="16" y="174" font-family="system-ui, sans-serif" font-size="9" fill="#94a3b8">Auto sink failover</text>
+  </g>
+
+  <!-- Arrow 1 -> 2 -->
+  <line x1="185" y1="177" x2="215" y2="177" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)" stroke-dasharray="3,3"/>
+
+  <!-- Step 2: CAVA Engine -->
+  <g transform="translate(220, 85)">
+    <rect width="145" height="185" rx="10" fill="url(#cardGrad)" stroke="#334155" stroke-width="1"/>
+    <rect x="0" y="0" width="145" height="4" rx="2" fill="url(#accentGreen)"/>
+    <text x="16" y="32" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#34d399">2. CAVA Core</text>
+    <text x="16" y="52" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">FFT &amp; RAW STREAM</text>
+    
+    <rect x="14" y="68" width="117" height="30" rx="6" fill="#1e293b" stroke="#334155"/>
+    <text x="24" y="87" font-family="system-ui, sans-serif" font-size="10" fill="#cbd5e1">16-256 Bands FFT</text>
+    
+    <rect x="14" y="106" width="117" height="30" rx="6" fill="#1e293b" stroke="#334155"/>
+    <text x="24" y="125" font-family="system-ui, sans-serif" font-size="10" fill="#cbd5e1">Raw ASCII Pipe</text>
+    
+    <text x="16" y="160" font-family="system-ui, sans-serif" font-size="9" fill="#94a3b8">Config Generator</text>
+    <text x="16" y="174" font-family="system-ui, sans-serif" font-size="9" fill="#94a3b8">Low-latency pipe</text>
+  </g>
+
+  <!-- Arrow 2 -> 3 -->
+  <line x1="365" y1="177" x2="395" y2="177" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)" stroke-dasharray="3,3"/>
+
+  <!-- Step 3: Motion Engine & Theme -->
+  <g transform="translate(400, 85)">
+    <rect width="165" height="185" rx="10" fill="url(#cardGrad)" stroke="#334155" stroke-width="1"/>
+    <rect x="0" y="0" width="165" height="4" rx="2" fill="url(#accentPurple)"/>
+    <text x="16" y="32" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#a78bfa">3. Motion Engine</text>
+    <text x="16" y="52" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">RUST AUDIO PROCESSOR</text>
+    
+    <rect x="14" y="68" width="137" height="24" rx="4" fill="#1e293b" stroke="#334155"/>
+    <text x="22" y="84" font-family="system-ui, sans-serif" font-size="9.5" fill="#e2e8f0">Attack/Release Curves</text>
+    
+    <rect x="14" y="98" width="137" height="24" rx="4" fill="#1e293b" stroke="#334155"/>
+    <text x="22" y="114" font-family="system-ui, sans-serif" font-size="9.5" fill="#e2e8f0">Peak Gravity Falloff</text>
+    
+    <rect x="14" y="128" width="137" height="24" rx="4" fill="#1e293b" stroke="#334155"/>
+    <text x="22" y="144" font-family="system-ui, sans-serif" font-size="9.5" fill="#e2e8f0">Dynamic Normalization</text>
+
+    <text x="16" y="172" font-family="system-ui, sans-serif" font-size="9" fill="#c084fc">⚡ Omarchy Theme Sync</text>
+  </g>
+
+  <!-- Arrow 3 -> 4 (top) and 3 -> 5 (bottom) -->
+  <path d="M 565 150 L 595 150 L 595 125 L 615 125" fill="none" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M 565 200 L 595 200 L 595 225 L 615 225" fill="none" stroke="#a78bfa" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Step 4: Visual Modes (Ratatui/Kitty) -->
+  <g transform="translate(620, 85)">
+    <rect width="135" height="85" rx="8" fill="url(#cardGrad)" stroke="#38bdf8" stroke-width="1"/>
+    <text x="14" y="24" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#38bdf8">Ratatui &amp; Kitty TUI</text>
+    <text x="14" y="42" font-family="system-ui, sans-serif" font-size="9" fill="#cbd5e1">📻 Classic Bars &amp; Mirror</text>
+    <text x="14" y="58" font-family="system-ui, sans-serif" font-size="9" fill="#cbd5e1">〰️ Smooth Wave (Braille)</text>
+    <text x="14" y="74" font-family="system-ui, sans-serif" font-size="9" fill="#cbd5e1">🪐 Orbit Radial Spectrum</text>
+  </g>
+
+  <!-- Step 5: Omarchy Shell Bar Plugin -->
+  <g transform="translate(620, 185)">
+    <rect width="135" height="85" rx="8" fill="url(#cardGrad)" stroke="#a78bfa" stroke-width="1"/>
+    <text x="14" y="24" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#c084fc">Omarchy Bar Widget</text>
+    <text x="14" y="42" font-family="system-ui, sans-serif" font-size="9" fill="#cbd5e1">󰎈 Reactive Bar Status</text>
+    <text x="14" y="58" font-family="system-ui, sans-serif" font-size="9" fill="#cbd5e1">󰐊 One-click TUI Focus</text>
+    <text x="14" y="74" font-family="system-ui, sans-serif" font-size="9" fill="#cbd5e1">󰒓 Diagnostic Doctor</text>
+  </g>
+
+  <!-- Destination Label -->
+  <g transform="translate(775, 120)">
+    <rect width="105" height="110" rx="8" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+    <text x="14" y="32" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#f8fafc">Hyprland</text>
+    <text x="14" y="50" font-family="system-ui, sans-serif" font-size="9" fill="#94a3b8">Desktop Shell</text>
+    <line x1="14" y1="60" x2="91" y2="60" stroke="#334155" stroke-width="1"/>
+    <text x="14" y="78" font-family="system-ui, sans-serif" font-size="9" fill="#38bdf8">Tiled Panes</text>
+    <text x="14" y="96" font-family="system-ui, sans-serif" font-size="9" fill="#a78bfa">Floating OSD</text>
+  </g>
+
+  <path d="M 755 125 L 775 145" fill="none" stroke="#38bdf8" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M 755 225 L 775 200" fill="none" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#arrow)"/>
+</svg>

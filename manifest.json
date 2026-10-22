@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "chiv.chiviz",
+  "name": "Chiviz",
+  "version": "0.1.0",
+  "author": "chivopic",
+  "description": "Omarchy-Native Audio Visualizer & Bar Widget for Kitty and Hyprland",
+  "homepage": "https://github.com/chivopic/chiviz",
+  "license": "MIT",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "plugin/BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Chiviz Visualizer",
+    "description": "PipeWire audio spectrum visualizer launcher & quick status",
+    "category": "Media",
+    "defaultSection": "right",
+    "allowMultiple": false
+  }
+}
