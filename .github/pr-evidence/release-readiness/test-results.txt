@@ -1,0 +1,21 @@
+Chiviz release-readiness · captured test results
+Rendered command-output excerpt; this is test evidence, not a UI screenshot.
+
+Fake-PATH launcher tests:
+test_all_three_actions_use_expected_argument_vectors ... ok
+test_missing_chiviz_notifies_actionable_build_steps ... ok
+test_missing_kitty_notifies_install_command ... ok
+test_missing_both_dependencies_sends_combined_notice ... ok
+test_missing_dependencies_without_notifier_use_stderr ... ok
+test_invalid_mode_does_not_launch_or_notify ... ok
+Ran 6 tests ... OK
+
+Offline Rust suite (reused /tmp/omarchy-review-chiviz-target):
+running 10 tests
+test result: ok. 10 passed; 0 failed
+
+Additional checks:
+omarchy plugin validate . ... PASS
+bash -n scripts/chiviz-launch ... PASS
+qmllint BarWidget.qml ... exit 0; only existing style singleton warning
+git diff --check ... PASS

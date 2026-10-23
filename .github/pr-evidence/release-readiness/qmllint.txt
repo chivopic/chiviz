@@ -1,0 +1,9 @@
+Info: BarWidget.qml:3:1: Unused import [unused-imports]
+import Quickshell.Io
+^^^^^^
+Info: BarWidget.qml:7:1: Unused import [unused-imports]
+import qs.Commons as Commons
+^^^^^^
+Warning: BarWidget.qml:29:26: Member "body" not found on type "QObject" [missing-property]
+    fontSize: Style.font.body
+                         ^^^^

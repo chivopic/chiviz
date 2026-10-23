@@ -1,0 +1,17 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.03s
+     Running unittests src/main.rs (/tmp/omarchy-review-chiviz-target/debug/deps/chiviz-f94addd8f27b13ee)
+
+running 10 tests
+test motion::tests::test_resample_bands ... ok
+test motion::tests::test_motion_attack_and_release ... ok
+test audio::cava::tests::test_cava_config_generation ... ok
+test audio::cava::tests::test_parse_cava_line ... ok
+test audio::tests::test_audio_frame_energy_aggregation ... ok
+test theme::tests::test_parse_hex_color ... ok
+test audio::tests::test_silence_idle_detection ... ok
+test theme::tests::test_palette_gradient_interpolation ... ok
+test audio::device::tests::test_parse_wpctl_sinks ... ok
+test audio::device::tests::test_parse_wpctl_inspect ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

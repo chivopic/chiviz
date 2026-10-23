@@ -81,21 +81,65 @@
 
 ## 安装指南
 
-### 通过 Omarchy 插件市场安装
+插件市场只会安装顶栏微件文件，不会构建或安装 `chiviz` 可执行文件。请先安装运行依赖并构建二进制，再启用微件。即使只想在终端中使用、不安装顶栏微件，也需要完成相同的二进制构建步骤。
+
+### 1. 安装依赖并构建 Chiviz
+
+在 Omarchy / Arch Linux 上安装 Rust 工具链和运行依赖（`rust` 软件包提供 Cargo）：
+
+```bash
+sudo pacman -S --needed rust cava pipewire wireplumber kitty
+```
+
+编译并安装可执行文件至 `~/.local/bin`：
+
+```bash
+git clone https://github.com/chivopic/chiviz.git
+cd chiviz
+cargo build --release
+mkdir -p ~/.local/bin
+install -m 755 target/release/chiviz "$HOME/.local/bin/chiviz"
+```
+
+请确认终端和 Omarchy 桌面会话的 `PATH` 都包含 `~/.local/bin`，然后重新打开终端/会话。可用以下命令检查二进制及依赖：
+
+```bash
+command -v chiviz
+chiviz --doctor
+```
+
+### 2. 在终端中使用
+
+完成上述构建后即可直接启动 Chiviz：
+
+```bash
+chiviz --demo
+```
+
+仅在终端使用不需要安装或启用顶栏插件。
+
+### 3. 安装并启用顶栏插件
+
+确认 `chiviz` 已安装，且 Omarchy 桌面会话的 `PATH` 能找到它之后，再安装并启用插件：
+
 ```bash
 omarchy plugin add https://github.com/chivopic/chiviz.git --enable
 ```
 
-### 从源码编译安装
-```bash
-# 确认安装依赖（Arch Linux / Omarchy）
-sudo pacman -S cava pipewire wireplumber kitty
+顶栏左键、中键、右键分别启动可视化窗口、浮动模式和 `chiviz --doctor`。若微件无法在 `PATH` 中找到 `chiviz` 或 Kitty，会显示 Omarchy 通知并给出下一步操作，不会静默失败。
 
-# 编译并安装至用户 PATH
-git clone https://github.com/chivopic/chiviz.git
-cd chiviz
-cargo build --release
-install -m 755 target/release/chiviz ~/.local/bin/chiviz
+### 卸载
+
+使用以下命令移除顶栏插件：
+
+```bash
+omarchy plugin remove chiv.chiviz --yes
+```
+
+移除插件不会删除手动构建的二进制。如需单独删除它，可运行：
+
+```bash
+rm -f ~/.local/bin/chiviz
 ```
 
 ## 快捷键映射

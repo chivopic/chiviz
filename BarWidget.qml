@@ -16,6 +16,11 @@ BarWidget {
   readonly property var sink: Pipewire.defaultAudioSink
   readonly property bool hasAudio: sink !== null && sink.audio && !sink.audio.muted && sink.audio.volume > 0
 
+  function launch(mode) {
+    var helperPath = decodeURIComponent(Qt.resolvedUrl("scripts/chiviz-launch").toString().replace(/^file:\/\//, ""))
+    Quickshell.execDetached([helperPath, mode])
+  }
+
   WidgetButton {
     id: button
     anchors.fill: parent
@@ -23,15 +28,15 @@ BarWidget {
     text: "󰎈"
     fontSize: Style.font.body
     active: root.hasAudio
-    tooltipText: "⚡ Chiviz 音频可视化\n• 左键：唤醒 / 聚焦可视化窗口\n• 右键：运行系统自检诊断 (--doctor)\n• 中键：浮动独立小窗模式"
+    tooltipText: "⚡ Chiviz 音频可视化\n• 左键：唤醒 / 聚焦可视化窗口\n• 右键：运行系统自检诊断 (--doctor)\n• 中键：浮动独立小窗模式\n需先构建 chiviz 并安装 Kitty"
 
     onPressed: function(btn) {
       if (btn === Qt.RightButton) {
-        Quickshell.execDetached(["kitty", "--class", "chiviz-doctor", "--hold", "-e", "chiviz", "--doctor"])
+        root.launch("doctor")
       } else if (btn === Qt.MiddleButton) {
-        Quickshell.execDetached(["kitty", "--class", "chiviz-float", "-e", "chiviz"])
+        root.launch("float")
       } else {
-        Quickshell.execDetached(["omarchy-launch-or-focus", "chiviz-visualizer", "kitty --class chiviz-visualizer -e chiviz"])
+        root.launch("visualizer")
       }
     }
   }

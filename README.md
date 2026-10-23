@@ -81,21 +81,65 @@
 
 ## Installation
 
-### Via Omarchy Plugin Marketplace
+The marketplace installs the bar widget files; it does not build or install the `chiviz` executable. Install the runtime dependencies and build the executable before enabling the widget. The same binary setup is required when using Chiviz from the terminal without the bar widget.
+
+### 1. Install dependencies and build Chiviz
+
+On Omarchy / Arch Linux, install the Rust toolchain and runtime dependencies (`rust` provides Cargo):
+
+```bash
+sudo pacman -S --needed rust cava pipewire wireplumber kitty
+```
+
+Build and install the executable to `~/.local/bin`:
+
+```bash
+git clone https://github.com/chivopic/chiviz.git
+cd chiviz
+cargo build --release
+mkdir -p ~/.local/bin
+install -m 755 target/release/chiviz "$HOME/.local/bin/chiviz"
+```
+
+Make sure `~/.local/bin` is present in `PATH` for both your terminal and the Omarchy desktop session, then open a new terminal/session. Verify the binary and dependencies with:
+
+```bash
+command -v chiviz
+chiviz --doctor
+```
+
+### 2. Use from the terminal
+
+After the build above, launch Chiviz directly:
+
+```bash
+chiviz --demo
+```
+
+This terminal-only use does not require installing or enabling the bar plugin.
+
+### 3. Install and enable the bar plugin
+
+After `chiviz` is installed and on the desktop session `PATH`, install and enable the plugin:
+
 ```bash
 omarchy plugin add https://github.com/chivopic/chiviz.git --enable
 ```
 
-### From Source
-```bash
-# Prerequisites (Arch Linux / Omarchy)
-sudo pacman -S cava pipewire wireplumber kitty
+The left, middle, and right bar actions launch the visualizer, floating mode, and `chiviz --doctor` respectively. If `chiviz` or Kitty is missing from `PATH`, the widget shows an Omarchy notification with the next setup command instead of silently failing.
 
-# Build & install binary
-git clone https://github.com/chivopic/chiviz.git
-cd chiviz
-cargo build --release
-install -m 755 target/release/chiviz ~/.local/bin/chiviz
+### Uninstall
+
+Remove the bar plugin with:
+
+```bash
+omarchy plugin remove chiv.chiviz --yes
+```
+
+The plugin removal does not uninstall the manually built binary. To remove that binary separately, run:
+
+```bash
+rm -f ~/.local/bin/chiviz
 ```
 
 ## Keybindings
