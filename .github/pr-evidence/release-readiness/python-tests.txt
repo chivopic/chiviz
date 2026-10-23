@@ -1,0 +1,11 @@
+test_all_three_actions_use_expected_argument_vectors (test_launcher.LauncherTests.test_all_three_actions_use_expected_argument_vectors) ... ok
+test_invalid_mode_does_not_launch_or_notify (test_launcher.LauncherTests.test_invalid_mode_does_not_launch_or_notify) ... ok
+test_missing_both_dependencies_sends_combined_notice (test_launcher.LauncherTests.test_missing_both_dependencies_sends_combined_notice) ... ok
+test_missing_chiviz_notifies_actionable_build_steps (test_launcher.LauncherTests.test_missing_chiviz_notifies_actionable_build_steps) ... ok
+test_missing_dependencies_without_notifier_use_stderr (test_launcher.LauncherTests.test_missing_dependencies_without_notifier_use_stderr) ... ok
+test_missing_kitty_notifies_install_command (test_launcher.LauncherTests.test_missing_kitty_notifies_install_command) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.125s
+
+OK

@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="840" viewBox="0 0 1440 840" role="img" aria-labelledby="title desc">
+  <title id="title">Chiviz build and launch flow</title>
+  <desc id="desc">Install dependencies, build and install the binary, verify PATH, then optionally enable the bar widget. The widget checks for chiviz and Kitty before routing the three actions.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#101827"/>
+      <stop offset="1" stop-color="#1a2334"/>
+    </linearGradient>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#89b4fa"/>
+    </marker>
+    <style>
+      .title { font: 700 30px 'DejaVu Sans', sans-serif; fill: #f2f4f8; }
+      .sub { font: 400 16px 'DejaVu Sans', sans-serif; fill: #aab6c8; }
+      .head { font: 700 18px 'DejaVu Sans', sans-serif; fill: #f2f4f8; }
+      .body { font: 400 15px 'DejaVu Sans', sans-serif; fill: #d4dbea; }
+      .code { font: 500 14px 'DejaVu Sans Mono', monospace; fill: #b7e3d0; }
+      .small { font: 400 13px 'DejaVu Sans', sans-serif; fill: #aab6c8; }
+      .node { fill: #202c40; stroke: #42516b; stroke-width: 1.5; }
+      .blue { fill: #263a59; stroke: #89b4fa; }
+      .green { fill: #1f413d; stroke: #a6e3a1; }
+      .amber { fill: #493b2b; stroke: #f9e2af; }
+      .arrow { fill: none; stroke: #89b4fa; stroke-width: 2.5; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect width="1440" height="840" rx="26" fill="url(#bg)"/>
+  <text x="64" y="72" class="title">Chiviz · build before enabling the bar</text>
+  <text x="64" y="105" class="sub">Marketplace installation adds the widget files. The Rust executable is built and installed separately.</text>
+
+  <rect x="64" y="150" width="400" height="184" rx="18" class="node blue"/>
+  <text x="92" y="190" class="head">1 · Install prerequisites</text>
+  <text x="92" y="226" class="body">Rust/Cargo for building; runtime stack</text>
+  <text x="92" y="258" class="code">rust · cava · pipewire · wireplumber · kitty</text>
+  <text x="92" y="296" class="small">Arch / Omarchy package names</text>
+
+  <path d="M464 242 H514" class="arrow"/>
+
+  <rect x="530" y="150" width="400" height="184" rx="18" class="node green"/>
+  <text x="558" y="190" class="head">2 · Build and install binary</text>
+  <text x="558" y="226" class="code">cargo build --release</text>
+  <text x="558" y="254" class="code">mkdir -p ~/.local/bin</text>
+  <text x="558" y="282" class="code">install -m 755 target/release/chiviz</text>
+  <text x="558" y="310" class="code">&quot;$HOME/.local/bin/chiviz&quot;</text>
+
+  <path d="M930 242 H980" class="arrow"/>
+
+  <rect x="996" y="150" width="380" height="184" rx="18" class="node amber"/>
+  <text x="1024" y="190" class="head">3 · Verify PATH</text>
+  <text x="1024" y="226" class="code">command -v chiviz</text>
+  <text x="1024" y="258" class="code">chiviz --doctor</text>
+  <text x="1024" y="296" class="small">Desktop session PATH must include ~/.local/bin</text>
+
+  <path d="M1186 334 V374 H314 V390" class="arrow"/>
+  <path d="M1186 374 H993 V390" class="arrow"/>
+  <rect x="64" y="398" width="500" height="144" rx="18" class="node"/>
+  <text x="92" y="440" class="head">Terminal use</text>
+  <text x="92" y="478" class="body">Launch the installed binary directly:</text>
+  <text x="92" y="512" class="code">chiviz --demo</text>
+
+  <rect x="610" y="398" width="766" height="144" rx="18" class="node blue"/>
+  <text x="638" y="440" class="head">Optional · install the bar widget after the binary</text>
+  <text x="638" y="480" class="code">omarchy plugin add https://github.com/chivopic/chiviz.git --enable</text>
+  <text x="638" y="514" class="small">The widget checks chiviz and Kitty before launching an action.</text>
+
+  <path d="M992 542 V588" class="arrow"/>
+  <rect x="64" y="602" width="1312" height="180" rx="18" class="node"/>
+  <text x="92" y="642" class="head">Bar actions · each route is passed as an argument vector to scripts/chiviz-launch</text>
+  <rect x="92" y="668" width="380" height="82" rx="12" class="green"/>
+  <text x="112" y="700" class="body">Left click</text>
+  <text x="112" y="730" class="code">omarchy-launch-or-focus · visualizer</text>
+  <rect x="530" y="668" width="380" height="82" rx="12" class="green"/>
+  <text x="550" y="700" class="body">Middle click</text>
+  <text x="550" y="730" class="code">kitty · chiviz float mode</text>
+  <rect x="968" y="668" width="380" height="82" rx="12" class="green"/>
+  <text x="988" y="700" class="body">Right click</text>
+  <text x="988" y="730" class="code">kitty · chiviz --doctor</text>
+  <text x="64" y="818" class="small">If chiviz or Kitty is unavailable, the helper sends an Omarchy notification with the setup command.</text>
+</svg>
